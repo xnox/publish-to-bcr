@@ -127,7 +127,7 @@ jobs:
       TAG_NAME: ${{ inputs.tag_name }}
     steps:
     - name: Checkout the module repository
-      uses: actions/checkout@v4.2.2
+      uses: actions/checkout@v5.0.0
       with:
         ref: ${{ inputs.templates_ref || inputs.tag_name }}
         repository: ${{ inputs.repository }}
@@ -135,12 +135,11 @@ jobs:
         persist-credentials: false
 
     - name: Checkout BCR
-      uses: actions/checkout@v4.2.2
+      uses: actions/checkout@v5.0.0
       with:
         repository: ${{ inputs.registry }}
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.publish_token || secrets.GITHUB_TOKEN }}
         path: bazel-central-registry
-        persist-credentials: false
 
     # Get version from the tag, stripping the specified prefix
     - name: Write release version
@@ -275,7 +274,7 @@ jobs:
         set -o errexit -o nounset -o pipefail
 
         # Use an authorized remote url to push to the fork
-        git remote add authed-fork https://x-access-token:${{ secrets.publish_token }}@github.com/${REGISTRY_FORK}.git
+        git remote add authed-fork https://github.com/${REGISTRY_FORK}.git
 
         BRANCH="${{ steps.create-final-entry.outputs.module-names }}-${TAG_NAME}"
         git checkout -b "${BRANCH}"
@@ -286,7 +285,6 @@ jobs:
           -c "committer.email=${COMMITTER_EMAIL}" \
           commit \
           -m "${{ steps.create-final-entry.outputs.short-description }}"
-        git config list
         git push --force authed-fork "${BRANCH}"
 
         echo "branch=${BRANCH}" >> $GITHUB_OUTPUT
