@@ -286,6 +286,7 @@ jobs:
           -c "committer.email=${COMMITTER_EMAIL}" \
           commit \
           -m "${{ steps.create-final-entry.outputs.short-description }}"
+        git config list
         git push --force authed-fork "${BRANCH}"
 
         echo "branch=${BRANCH}" >> $GITHUB_OUTPUT
